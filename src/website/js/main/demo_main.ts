@@ -28,6 +28,18 @@ import { readSampleRateParam } from "../utils/sample_rate_param.ts";
  */
 const SF_NAME = "GeneralUserGS.sf3";
 
+// Get the base URL for demo songs - use current domain or fallback
+const getBaseUrl = () => {
+    const origin = window.location.origin;
+    const pathname = window.location.pathname;
+    // Get the base path (e.g., /SpessaSynth/)
+    const basePath = pathname.endsWith('/') ? pathname : pathname.split('/').slice(0, -1).join('/') + '/';
+    return origin + basePath;
+};
+
+const DEMO_SONGS_BASE = getBaseUrl() + 'spessasynth-demo-songs/demo_songs/';
+const DEMO_SONGS_LIST = getBaseUrl() + 'spessasynth-demo-songs/demo_song_list.json';
+
 const titleMessage = document.querySelector<HTMLElement>("#title")!;
 const fileInput = document.querySelector<HTMLInputElement>("#midi_file_input")!;
 const sfInput = document.querySelector("#sf_file_input")!;
@@ -406,10 +418,7 @@ async function playDemoSong(song: DemoSong) {
     titleMessage.textContent = window.manager.localeManager.getLocaleString(
         "locale.synthInit.genericLoading"
     );
-    const r = await fetch(
-        "https://spessasus.github.io/spessasynth-demo-songs/demo_songs/" +
-            song.fileName
-    );
+    const r = await fetch(DEMO_SONGS_BASE + song.fileName);
     if (!song.fullMIDISupport) {
         window.manager.synth.setMasterParameter("nprnParamLock", true);
         window.manager.synth.setMasterParameter("drumLock", true);
@@ -552,9 +561,7 @@ demoSongButton.addEventListener("click", async () => {
         "locale.synthInit.genericLoading"
     );
     const songs = await (
-        await fetch(
-            "https://spessasus.github.io/spessasynth-demo-songs/demo_song_list.json"
-        )
+        await fetch(DEMO_SONGS_LIST)
     )
         // eslint-disable-next-line unicorn/no-await-expression-member
         .text();
