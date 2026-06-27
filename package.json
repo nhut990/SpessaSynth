@@ -3,6 +3,7 @@
     "version": "4.2.12",
     "type": "module",
     "private": true,
+    "homepage": "https://nhut990.github.io/SpessaSynth/",
     "scripts": {
         "perms": "chmod +x src/build/*",
         "test:types": "eslint --cache && tsc -b",
