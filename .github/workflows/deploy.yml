@@ -1,54 +1,45 @@
 name: Deploy SpessaSynth
 
 on:
-    # Runs on pushes targeting the default branch
-    push:
-        branches: ["master"]
-
-    workflow_dispatch:
+  push:
+    branches: [ "master" ]
+  workflow_dispatch:
 
 permissions:
-    contents: read
-    pages: write
-    id-token: write
+  contents: read
+  pages: write
+  id-token: write
 
 concurrency:
-    group: "pages"
-    cancel-in-progress: true
+  group: "pages"
+  cancel-in-progress: false
 
 jobs:
-    deploy:
-        environment:
-            name: github-pages
-            url: ${{ steps.deployment.outputs.page_url }}
-        runs-on: ubuntu-latest
-        steps:
-            - name: Checkout
-              uses: actions/checkout@v6
+  build:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Lấy mã nguồn
+        uses: actions/checkout@v4
+      - name: Cài đặt Node.js
+        uses: actions/setup-node@v4
+        with:
+          node-version: 20
+      - name: Cài đặt thư viện và Build dự án
+        run: |
+          npm install
+          npm run build
+      - name: Đóng gói sản phẩm
+        uses: actions/upload-pages-artifact@v3
+        with:
+          path: './dist'
 
-            - name: Set up Node
-              uses: actions/setup-node@v6
-              with:
-                  node-version: lts/*
-                  cache: "npm"
-
-            - name: Install dependencies
-              run: npm ci
-
-            - name: Apply permissions
-              run: npm run perms
-
-            - name: Build
-              run: npm run build
-
-            - name: Setup Pages
-              uses: actions/configure-pages@v5
-
-            - name: Upload artifact
-              uses: actions/upload-pages-artifact@v3
-              with:
-                  # Upload dist folder
-                  path: "./dist"
-            - name: Deploy to GitHub Pages
-              id: deployment
-              uses: actions/deploy-pages@v4
+  deploy:
+    environment:
+      name: github-pages
+      url: ${{ steps.deployment.outputs.page_url }}
+    runs-on: ubuntu-latest
+    needs: build
+    steps:
+      - name: Deploy lên GitHub Pages
+        id: deployment
+        uses: actions/deploy-pages@v4
